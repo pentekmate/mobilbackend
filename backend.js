@@ -17,9 +17,6 @@ function kapcsolat() {
 app.use(express.json())
 app.use(cors())
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
 
 app.get('/listak', (req, res) => {
   kapcsolat()
@@ -32,7 +29,7 @@ app.get('/listak', (req, res) => {
   })
   connection.end()
 })
-
+//felhasználók adatainak letöltése //Login.js
 app.get('/felhasznalok', (req, res) => {
   kapcsolat()
 
@@ -44,10 +41,11 @@ app.get('/felhasznalok', (req, res) => {
   })
   connection.end()
 })
+//regisztrációs adatok feltöltése //Regisztracio.js
 app.post('/regisztracio', (req, res) => {
   kapcsolat()
 
-  connection.query('INSERT INTO `listak` VALUES (NULL, "' + req.body.bevitel1 + '",CURDATE(), "' + req.body.bevitel2 + '");', function (err, rows, fields) {
+  connection.query('INSERT INTO `felhasznalo` VALUES (NULL, "' + req.body.bevitel1 + '", "' + req.body.bevitel2 + '",CURDATE())', function (err, rows, fields) {
     if (err)
       console.log(err)
     else {
@@ -58,7 +56,7 @@ app.post('/regisztracio', (req, res) => {
   connection.end()
 
 })
-
+//lista mentése adatbázisba, felhasználónévvel //Lista_input.js
 app.post('/tartalomfel', (req, res) => {
   kapcsolat()
 
@@ -73,6 +71,8 @@ app.post('/tartalomfel', (req, res) => {
   connection.end()
 
 })
+
+//felhasznalo adatainak lekérése,szűrve //Elso.js
 app.post('/felhasznalolistai', (req, res) => {
   kapcsolat()
 
@@ -89,7 +89,7 @@ app.post('/felhasznalolistai', (req, res) => {
 })
 
 
-
+//hárómhónapnál régebbi listák törlése
 app.delete('/regilistatorles', (req, res) => {
   kapcsolat()
 
@@ -105,7 +105,7 @@ app.delete('/regilistatorles', (req, res) => {
 
 })
 
-
+//listák árainak feltöltése
 app.post('/arfel', (req, res) => {
   kapcsolat()
 
@@ -120,9 +120,26 @@ app.post('/arfel', (req, res) => {
   connection.end()
 
 })
+//Felhasznalo listainak osszeszamlalasa
+
+app.post('/felhasznaloossz', (req, res) => {
+  kapcsolat()
+
+  connection.query('SELECT count(listak_nev) as osszes  FROM `listak` WHERE `letrehozofelhasznalo` = "'+req.body.bevitel1+'";', function (err, rows, fields) {
+    if (err)
+      console.log(err)
+    else {
+      console.log(rows[0])
+      res.send(rows)
+      
+    }
+  })
+  connection.end()
+
+})
 
 
-
+//3hónapnál frissebb listák mutatása
 
 app.get('/aktualis', (req, res) => {
   kapcsolat()
@@ -134,6 +151,21 @@ app.get('/aktualis', (req, res) => {
     res.send(rows)
   })
   connection.end()
+})
+//regisztráciodatum
+app.post('/regisztraciodatum', (req, res) => {
+  kapcsolat()
+
+  connection.query('SELECT YEAR(`felhasznalo_regisztrdatum`)as"datum",MONTH(felhasznalo_regisztrdatum) as "honap"  FROM `felhasznalo` WHERE `felhasznalo_nev`="'+req.body.bevitel1+'"', function (err, rows, fields) {
+    if (err)
+      console.log(err)
+    else {
+      console.log(rows[0])
+      res.send(rows)
+    }
+  })
+  connection.end()
+
 })
 
 
